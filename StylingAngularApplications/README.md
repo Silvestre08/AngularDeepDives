@@ -42,4 +42,3 @@ In order to work with this project here's what you'll need to do...
 4. Install project dependencies<br />`npm install`<br /><br />
 5. Build the code, watch for file changes, and serve up the site locally<br />`npm start`.
 6. Ng serve wont work because ssl error of old versions of nodejs.
-   Test
