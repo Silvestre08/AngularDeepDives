@@ -1,0 +1,14 @@
+<ul class="items">
+    <li 
+        *ngFor="let tab of tabs"
+        class="item"
+        [ngClass]="tab.active ? 'item--active' : 'item--inactive'">
+        <a 
+            (click)="selectTab(tab)"
+            class="item__link"
+            [ngClass]="tab.active ? 'item__link--active' : 'item__link--inactive'">
+            {{tab.title}}
+        </a>
+    </li>
+</ul>
+<ng-content></ng-content>
