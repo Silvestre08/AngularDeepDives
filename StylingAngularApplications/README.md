@@ -32,13 +32,44 @@ In order to work with this project here's what you'll need to do...
 
 ### Install and Set Up
 
-1. Install the following if you don't already have them
+1. Build the code, watch for file changes, and serve up the site locally<br />`npm start`.
+2. Ng serve wont work because ssl error of old versions of nodejs.
 
-- [node.js](https://nodejs.org/en/ "Node.js")
-- [git](https://git-scm.com/ "Git")<br /><br />
+## Styling Angular Applications
 
-2. Clone the repository down to your computer<br />`https://github.com/pluralsight-styling-angular-apps/demos-v3.git`<br /><br />
-3. CD to the project folder<br />`cd demos-v3`<br /><br />
-4. Install project dependencies<br />`npm install`<br /><br />
-5. Build the code, watch for file changes, and serve up the site locally<br />`npm start`.
-6. Ng serve wont work because ssl error of old versions of nodejs.
+Most of the web these days is dveloped using web components. Angular provided much more than web components provide out of the box.
+When using Angular we re practically building web components.
+Web components are bundles of modular HTML, CSS and Javascript that represent portions of the ui in the browser. They provide a way to isolate and reuse sections of an application. This web components can be reused within the same application or across several applications.
+Web components are composed of:
+
+1. Custom elements: they allow use to use and create our own custom elements. So we create a component and just use it in HTML, by declaring the custom element where we need it.
+2. HTML templates: fragments of markup that are not actually rendered to the page. Their purpose is to be reference and cloned into a specific location. The structure of the markup that it will be bundled into our component.
+3. Shadow DOM: essential. It is the encapsulated DOM that we have access within our component to styling and scripting against. A set of JavaScript APIs for attaching an encapsulated "shadow" DOM tree to an element — which is rendered separately from the main document DOM — and controlling associated functionality. In this way, we can keep an element's features private, so they can be scripted and styled without the fear of collision with other parts of the document.
+   Let's see as an example:
+
+```
+<div>
+  <input type="range">
+</div>
+```
+
+What actually gets rendered it is way more that:
+
+```
+div
+- input[range]
+  - bar
+  - thumb
+```
+
+So the browser render way more elements than the one we put first. We cannot use javascript to access the inner elements of the input components. If the inner component have events, the raiser would be always the parent. So the latter is shadow DOM.
+Back to web components, when we develop web components, out HTML, CSS and javascript inside that element will be the elements shadow DOM.
+
+Angular components are setup to function like native web components.
+
+View encasulation in Angular is how we control/ emulate, use shdow dom or dont use any style scoping behavior at all.
+We have 3 different modes:
+
+1. None
+2. Emulated: the default. Out of the box Angular will add scoping attributes that we can see on the component nodes. The component gets the ngHost and the elements get the ngContent (content nodes withing the component). So how does angular keeps CSS only at the component scope. Angular inserts the styles of all of our componets and the head and tags them with the gncontent attributes. That is how div elements for example can have global style or specific style within a component that not get ovveriden by the main one.
+3. Shadow DOM
