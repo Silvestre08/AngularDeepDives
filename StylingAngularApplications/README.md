@@ -67,9 +67,50 @@ Back to web components, when we develop web components, out HTML, CSS and javasc
 
 Angular components are setup to function like native web components.
 
-View encasulation in Angular is how we control/ emulate, use shdow dom or dont use any style scoping behavior at all.
-We have 3 different modes:
+View encasulation in Angular is how we control/ emulate, use shdow dom or not, or dont use any style scoping behavior at all.
+We have 3 different modes, being the emulated mode the default:
 
-1. None
-2. Emulated: the default. Out of the box Angular will add scoping attributes that we can see on the component nodes. The component gets the ngHost and the elements get the ngContent (content nodes withing the component). So how does angular keeps CSS only at the component scope. Angular inserts the styles of all of our componets and the head and tags them with the gncontent attributes. That is how div elements for example can have global style or specific style within a component that not get ovveriden by the main one.
-3. Shadow DOM
+1. Emulated: the default angular mode. Out of the box, Angular will add scoping attributes that we can see on the component nodes. The component gets the ngHost and the elements get the ngContent attribute (content nodes withing the component).
+   ![](doc/nGContentAttribute.png)
+   So how does angular keeps CSS only at the component scope? Angular inserts the styles of all of our componets at the head and tags them with the same gnContent attributes. That is how, for example, div elements can have global style, generic for div elements of the entire app, or they can have specific style within a component that not get ovveriden by the main one.
+   See how the styles in the header get tagged with the ngContent:
+   ![](doc/ngContentHeader.png)
+2. None: we stop seeing the ngContent and host attributes. So all styles go to the header but individual component styles get overrided by the default ones. Why use this? Some use cases require that. As an example, we can set the view encapsulation to none at the app component level. The app component is a good place to put styles that will be applied globably. The styles of the app component are also the first ones to appear in the header.
+3. Shadow DOM: this will use the shadow dom native capability of th browsers that actually support it. There will be no emulation. An actual shadow root will be created which will isolate the markup and css outside of the scope of the parent document. See the shadow dom in chrome:
+   ![](doc/shadowroot.png)
+   This would break the app in older browsers.
+   Changing the view encapsulation mode can only be done per component basis, inside the component decorator.
+   It is probably just better to stick with the default emulated mode.
+
+## Component Styles
+
+There are several ways to add styles to the component. using styles property, inserting them directly on a template, using a separate style sheet with a tradional link tag or use the styleURL of the component, inline directly on the elements (not a good idea) etc.
+Angular these days just uses separate style sheets for the component with styleURL at the component level by default.
+
+## CSS Scoping
+
+Angular emulates the behavior using a handfull css selectors from the css scoping module. These selectors allow us to target what we consider the host element of our components using :host pseudo class. It also allows use to detect a particular context of an element using :host_context pseudo class.
+We can even go through the shadow elements to style child component using the ng-deep.
+
+### Host pseudo class
+
+In the view encapsulation mode, every component has what is considered a host element whose shadow tree contains all of the nodes from the component view. With the css scoping mmodule we can style this host using the host pseudo class. Modern browsers support that out of the box. But the view emulated mode of Angular gives us extra support for old browsers.
+So what is the benefit? Sometime we might need to check if something like a class exists before applying styles to it, so we would add that class in our component declaration in html
+
+```
+<ourcomponent class="ourClass"></ourcomponent>
+
+// in the css file
+:host(.ourClass)
+```
+
+So we only target the host, when the host has a class on it.
+
+### host-context pseudo class
+
+To be used when we need to style our component based on the context it is applied, for example, dependent on the container our custom component is being used:
+![](doc/hostContext.png)
+This css selector will scan the document tree up to the root to see if any parent element matches the selection attribute. It will scan all parent elements including the host itself. So our styles will be applied if the host or any parent element match.
+This can cause problems while reusing components where want different styles applied to them.
+
+It is also not so well supported by all browsers so it is recommended to use view emulative encaspulation of Angular.
