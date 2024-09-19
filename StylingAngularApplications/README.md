@@ -110,7 +110,110 @@ So we only target the host, when the host has a class on it.
 
 To be used when we need to style our component based on the context it is applied, for example, dependent on the container our custom component is being used:
 ![](doc/hostContext.png)
-This css selector will scan the document tree up to the root to see if any parent element matches the selection attribute. It will scan all parent elements including the host itself. So our styles will be applied if the host or any parent element match.
-This can cause problems while reusing components where want different styles applied to them.
+This css selector will scan the document tree where this component is inserted up to the root to see if any parent element matches the selection attribute. It will scan all parent elements including the host itself. So our styles will be applied if the host or any parent element match.
+This can cause problems while reusing components where want different styles applied to them. Lets see the example of a component being reused inside of itself:
 
+```
+:host-context(.color-01){
+  background: Red
+  }
+
+:host-context(.color-02){
+  background: Yellow
+  }
+
+// template file
+<ourcomponent class="color-01">
+<ourcomponent class="color-02"></ourcomponent>
+</ourcomponent>
+```
+
+With host-context the style applied would be the color 01 style. Because we are using host context both styles are applied but the last one wins. Changing to :host would fix the problem on this case.
+So host-context should be used carefully.
 It is also not so well supported by all browsers so it is recommended to use view emulative encaspulation of Angular.
+
+### ng:deep
+
+But what if we want to look down the tree? We can do this with the deep combinator to style nested components. We have the concept of content projection:
+
+![](doc/componentSlots.png)
+
+We can create _slots_ inside our components template, that we can use to display different content every time we use this component. It makes our component behave like other html elements. We basically inject content between the html tags of our element like:
+
+```
+<ourelement>
+<customcontent></customcontent>
+</ourelement>
+```
+
+We do that with the tag ng-content inside our custom element's template, the place where we want to display custom content. Then in the place we use our component we would just insert custom content like we see above.
+The thing about this custom content is that the styles applied to the custom content will have the scope of the parent component, where ourelement is going to be used. Sometimes that is the dired behavior: think of dialogs. We want to display dynamic content and the style be determined on an individual case basis.
+But sometimes, we may have a predictable structure and may not want to style on an individual basis.
+This is where the deep combinator comes into play.
+![](doc/ngDeep.png)
+The problem is that Angular emulates the deep behavior by unscoping the anchor selectors so the styles will be applied to the entire document!!! Very careful.
+It is a good idea to use host pseudo class before deep, so Angular will scope the styles (it is event recommended to scope to the parent element):
+![](doc/deepTargeted.png)
+
+Deep was deprecated in Angular.
+
+So now with this style info, let's see how to create maintainable style architecture styles in Angular.
+
+## CSS and SCSS maintainable architecture
+
+Before Angular, most of the styles would be declared in a global scope of an APP and then be used on an element basis. Angular changes the game an it is recommended that most of the styles reside outside of the global scope, keeping them specific to where they are used, because as the app grows, maintaining styles can become a nightmare.
+There are though things that should still reside in the global space:
+
+1. Browser resets
+2. colors
+3. Typography
+4. Layout
+5. Media queries
+6. Utilities
+
+If we want, Angular also allows us working the old way.
+
+## Global Styles
+
+There are several ways of managing global styles and we will covert two:
+
+1. Class based system
+2. Global Sass variable and mixin approach.
+
+### Class based system
+
+It is the one more similar to the traditional approach, with the difference that we have global, widely applied styles and then individual component styles.
+First, we need somewhere to put the global styles.
+Because we are using Sass, we can break our style sheets up into very small modular Sass partials that can be logically grouped and organized.
+One way of implementing it is to use a directory like a _scsss_ in the app root and include there the styles, with Sass partials:
+![](doc/stylesGlobak.png)
+
+It can have a name more proper to the project. It just needs to be clear that we are talking about global styles.
+It is importan to establish a naming convention for the styles across the app, to protect against style conflict and collusions. We do not want names of classes in the global styles conflicting with classes present in individual styles of the components.
+For example layout styles could be prefixed with _l-_: l-content, for example.
+So how do we include them in our components?
+On way to do it is to add them in the root styles.scss:
+![](doc/importsAtStyles.png)
+
+Another way to do is to turn view encapsulation off in the _app_ component and include them there using styles url property.
+![](doc/stylesInAppComponent.png)
+The main consideration here is if we need scoped styles for the app component itself. If yes, we cannot use this way. Plus, styles in our app component won't be available until our app is fully loaded. This can be a problem if we are relying on these styles for an app loading view, unlike in the first case.
+Then we just need to add the global scoped classes to our elements.
+Long ugly selectors everywhere like when we combine multiple classes within a same element: we can even have combinations of globaly scoped styles and individual component styles.
+
+### Sass mixins and variables
+
+Mixins allow us to define styles that can be reused throughout a style sheet:
+![](doc/mixin.png)
+So we can convert this global items in variables and mixins and then import them and use them only when needed.
+Lets see an example:
+![](doc/gridLayoutGlobal.png)
+This is in a proper style file, SASS partial, but then we can just reuse, for example, in an individual component style sheet:
+![](doc/includeMixin.png)
+
+As a rule of thumb is better to not ovveride styles and start each individual component on a clean slate because things can get complicated as the app grows. Or almost clean. it can be a good idea to use a browser reset as a starting point for a component style
+Browser reset are simply a collection of styles that are intended to normalize the inconsitencies across browsers before adding any custom app css.
+This gives us the freedom to compose things as needed: we can include or not the mixins. It allows us to opt in and opt out, with minimal chage to the template.
+We just remove the mixin from our selector and that is it.
+Mixin completely seperates the structure from the representation, it is a more flexible approach to the global styles.
+Once our SASS is processed into raw css, the code is going to be duplicated, which is ok.
