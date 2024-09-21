@@ -322,6 +322,79 @@ The first step is to create the CSS for the default theme. Then we add variation
 ![](doc/hostContextThem.png)
 The styles defined here will only be applicable when out tab is inside the modal component and it has the color 02 class.
 
-## Conditional rendering
+## Conditional content display
 
-Todo!
+We always encounter scenarios where we need to decide if we render or not portions of the component view.
+For example, let's consider our message component. We may or may not need to render the description and its icon based on the fact if the content has been provided or not:
+![](doc/descritpion.png)
+In our message content template we have ng content slot for a message:
+<ng-content select="[slot-message]"></ng-content>
+We want to add logic to verify if content has been provided using this directive and if so we want to render the message content div. So we need a content child decorator in our class. We need this because this message will be outside of our component template (it will be in the component that will use the message.component).
+The child decorator looks like this in the component class file:
+
+```
+    @ContentChild('messageContent') messageContent: ElementRef;
+```
+
+Then in the template, we use the ngif directive:
+
+```
+ <div class="message__content" *ngIf="messageContent">
+```
+
+Another scenario we may run into is to render a portion of the component template based on the layout class provided to the component.
+What if this component can assume two possible layouts?
+So we add is layout01 property
+
+```
+export class MessageComponent implements AfterContentInit {
+    @ContentChild('messageContent') messageContent: ElementRef;
+    isLayout01 = false;
+
+    constructor(private hostRef: ElementRef) {}
+
+    ngAfterContentInit(): void {
+        this.isLayout01 = this.hostRef.nativeElement.classList.contains('layout--01');
+    }
+}
+```
+
+And then on the template :
+
+```
+        <svg class="message__icon" viewBox="0 0 24 24" *ngIf="isLayout01">
+            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2.033 16.01c.564-1.789 1.632-3.932 1.821-4.474.273-.787-.211-1.136-1.74.209l-.34-.64c1.744-1.897 5.335-2.326 4.113.613-.763 1.835-1.309 3.074-1.621 4.03-.455 1.393.694.828 1.819-.211.153.25.203.331.356.619-2.498 2.378-5.271 2.588-4.408-.146zm4.742-8.169c-.532.453-1.32.443-1.761-.022-.441-.465-.367-1.208.164-1.661.532-.453 1.32-.442 1.761.022.439.466.367 1.209-.164 1.661z"></path>
+        </svg>
+```
+
+So we do render the icon only if the layout is the layout 01.
+
+## Css custom properties
+
+This is all about opening components for extension by using hooks with CSS custom properties. These hooks are available to parent components.
+The first step to create a variable, using the var keyword with parentheses. Inside them we define the variable name that should be prefixed by 2 dashes (see background and color). Example of our message component:
+
+```
+:host {
+    background: var(--background, #ff0000); // variable name with default value red
+    color: var(--foreground, white);
+    font-size: 1rem;
+    margin: 1.5em 0;
+    padding: 1em 1.5em;
+}
+
+```
+
+Then these variables can be set in the parent style sheet. Example of our modal component, showing message and overriding the variables:
+
+```
+:host(.color--02) {
+
+    // CSS Custom Properties
+    --background: #C43B0E;
+    --foreground: white;
+
+    .modal {}}
+```
+
+This is the power of custom css properties. The modal is the parent of the message component. But the modal component itself is dependent on a host for its styles. This is the cascading of the css properties.
