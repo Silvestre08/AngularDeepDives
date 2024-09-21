@@ -316,3 +316,12 @@ constructor(private hostRef: ElementRef) {}
 So the hostref is basically the parent of the promo component. So we are chaining the style based on the grand parent.
 
 ### Using the hostContext psuedo class
+
+When we use host context we leverage the relatioship between the 2 components.
+The first step is to create the CSS for the default theme. Then we add variations and the host context pseudo class. It can be combined with CSS selectors:
+![](doc/hostContextThem.png)
+The styles defined here will only be applicable when out tab is inside the modal component and it has the color 02 class.
+
+## Conditional rendering
+
+Todo!
