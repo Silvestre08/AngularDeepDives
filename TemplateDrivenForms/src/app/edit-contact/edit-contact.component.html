@@ -2,10 +2,11 @@
   <h1 class="header">
     Edit Contact
   </h1>
-  <form (ngSubmit)="saveContact()">
+  <form (ngSubmit)="saveContact(contactForm)" #contactForm="ngForm">
     <section>
       <nav>Name/Info</nav>
       <div>
+        <input type="hidden" [ngModel]="contact.id" name="id"/>
         <input placeholder="First Name" [(ngModel)] = "contact.firstName" name="firstName" />
         <input placeholder="Last Name" [(ngModel)] = "contact.lastName" name="lastName" />
         <input placeholder="Date of Birth" [(ngModel)] = "contact.dateOfBirth" name="dateOfBirth" />
@@ -14,7 +15,7 @@
     </section>
     <section>
       <nav>Phone</nav>
-      <div class="flex-column">
+      <div class="flex-column" ngModelGroup="phone">
         <div class="flex-group">
           <input placeholder="Phone" [(ngModel)] = "contact.phone.phoneNumber" name="phoneNumber" />
           <img src="/assets/plus-grey-blue.png" class="add" />
@@ -29,7 +30,7 @@
     <section>
       <nav>Address</nav>
       <div>
-        <div class="address">
+        <div class="address" ngModelGroup="address">
           <div class="flex-group">
             <input placeholder="Address" [(ngModel)] = "contact.address.streetAddress" name="streetAddress" />
             <img src="/assets/plus-grey-blue.png" class="add" />
@@ -46,8 +47,12 @@
       </div>
     </section>
     <div class="buttons">
+      <!-- <button *ngIf="!contactForm.submitted" class="secondary" type="button">Cancel</button>
+      <button *ngIf="!contactForm.submitted" class="primary" type="submit" >Save</button>
+      <button *ngIf="contactForm.submitted" disabled>Saving...</button> -->
       <button class="secondary" type="button">Cancel</button>
-      <button class="primary" type="submit" >Save</button>
+      <button  class="primary" type="submit" >Save</button>
+      <button class="saving" disabled>Saving...</button>
     </div>
   </form>
 </div>

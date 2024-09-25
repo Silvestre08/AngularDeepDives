@@ -124,3 +124,15 @@ section div em {
 .buttons * {
   flex: 1 1 auto;
 }
+
+button.saving{
+  display: none;
+}
+
+form.ng-submitted button{
+  display: none;
+}
+
+form.ng-submitted button.saving{
+  display: block;
+}
