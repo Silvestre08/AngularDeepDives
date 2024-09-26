@@ -180,3 +180,23 @@ display: block;
 }
 
 We add class saving to our saving button. So when the form gets the ng.submitted class, we tartget the saving button to become visible and hide all the other buttons.
+
+## Working with common user controls
+
+### Radio buttons
+
+Just like you would do in plain html we declare each individual radio button on the template but we give the same name to all of them, so they work as a group. :
+
+        <div class="radio">
+          <input type="radio" value="mobile" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> Mobile
+          <input type="radio" value="work" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> Work
+          <input type="radio" value="other" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> Other
+        </div>
+
+There is an alternative way of doing it. We can define an array with ngFor (we have to declare the phoneValueTypes):
+
+```
+<span *ngFor="let phonetype of phoneValueTypes">
+<input type="radio" [value]="phonetype.value" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> {{phonetype.title}}
+</span>
+```
