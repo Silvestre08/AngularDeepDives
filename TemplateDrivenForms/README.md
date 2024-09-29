@@ -200,3 +200,22 @@ There is an alternative way of doing it. We can define an array with ngFor (we h
 <input type="radio" [value]="phonetype.value" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> {{phonetype.title}}
 </span>
 ```
+
+A select list works similar to radio buttons. Actually a little simpler and the same can be done there.
+
+### Checkboxes
+
+Check boxes in angular have some uniqueness to them. In plain HTML we could set the value attribute of a checkbox
+to a string. Angular just ignores that value, even if we delcare it on the model feedbing the checkbox, This happens because of the source directive angular creates when we apply ngModel to the checkbox.
+We have a checkbox value accessor, that sits between the html and the model and it only checks for the checked state of the checkbox.
+
+### Numeric inputs
+
+When we declare a type as numeric in typescript, the numeric type is just a development aid. If we log the type in the console of our favouritesRanking, we see string.
+The element has the default control value accessor, and this fdefault value accessor always updates the form model with a string value.
+Angular documentation says that there is a numeric value accessor. To use that we just change the input attribut to numberÇ
+<input placeholder="Favorites Ranking" type="number" [(ngModel)] = "contact.favoritesRanking" name="favoritesRanking" />
+It is a good practice to use numeric value accessor for numeric types. The console would now print number instead of string.
+If we use range, angular uses range value accessor. It is still numeric.
+
+### Date fields

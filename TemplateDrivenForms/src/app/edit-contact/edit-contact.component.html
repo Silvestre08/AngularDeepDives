@@ -10,7 +10,14 @@
         <input placeholder="First Name" [(ngModel)] = "contact.firstName" name="firstName" />
         <input placeholder="Last Name" [(ngModel)] = "contact.lastName" name="lastName" />
         <input placeholder="Date of Birth" [(ngModel)] = "contact.dateOfBirth" name="dateOfBirth" />
-        <input placeholder="Favorites Ranking" [(ngModel)] = "contact.favoritesRanking" name="favoritesRanking" />
+        <div>
+          <span>Favourites ranking:</span>
+          <input placeholder="Favorites Ranking" type="range" min="0" max="5" [(ngModel)] = "contact.favoritesRanking" name="favoritesRanking" />
+          <span>{{contact.favoritesRanking}}</span>
+        </div>
+        <div>
+          <input type="checkbox" [(ngModel)] = "contact.personal" name="personal" />
+        </div>
       </div>
     </section>
     <section>
@@ -39,13 +46,14 @@
           <input placeholder="State/Region" [(ngModel)] = "contact.address.state" name="state" />
           <input placeholder="Zip/Postal Code" [(ngModel)] = "contact.address.postalCode" name="postalCode" />
           <select [(ngModel)] = "contact.address.addressType" name="addressType">
-            <option value="home">Home</option>
-            <option value="work">Work</option>
-            <option value="other">Other</option>
+            <option *ngFor="let addressType of addressValueTypes" [value]="addressType.value">{{addressType.title}}</option>          
           </select>
         </div>
       </div>
     </section>
+  <section>
+    <textarea placeholder="notes" rows ="3" [(ngModel)] = "contact.notes" name="notes" ></textarea>
+  </section>
     <div class="buttons">
       <!-- <button *ngIf="!contactForm.submitted" class="secondary" type="button">Cancel</button>
       <button *ngIf="!contactForm.submitted" class="primary" type="submit" >Save</button>
