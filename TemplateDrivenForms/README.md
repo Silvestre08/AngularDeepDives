@@ -219,3 +219,10 @@ It is a good practice to use numeric value accessor for numeric types. The conso
 If we use range, angular uses range value accessor. It is still numeric.
 
 ### Date fields
+If we just use the default input text, it means we just use the default value accessor behind the scenes which treats all values as strings regardless of data types. Angular does not have an out-of-the-box date value accessor. So how do we work with dates?
+
+We can create our own cystom control value accessor or just handle dates as strings which is not a bad path to go (dates are a mess in javascript and not een support in json).
+We jus use din this module : .toISOString().split('T')[0],
+
+## Validating user inputs
+Validation in template driver froms is done by adding validator directives to the HTML elements. SOme built-in validators:
