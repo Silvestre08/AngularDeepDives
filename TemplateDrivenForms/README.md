@@ -219,10 +219,148 @@ It is a good practice to use numeric value accessor for numeric types. The conso
 If we use range, angular uses range value accessor. It is still numeric.
 
 ### Date fields
+
 If we just use the default input text, it means we just use the default value accessor behind the scenes which treats all values as strings regardless of data types. Angular does not have an out-of-the-box date value accessor. So how do we work with dates?
 
 We can create our own cystom control value accessor or just handle dates as strings which is not a bad path to go (dates are a mess in javascript and not een support in json).
 We jus use din this module : .toISOString().split('T')[0],
 
 ## Validating user inputs
-Validation in template driver froms is done by adding validator directives to the HTML elements. SOme built-in validators:
+
+Validation in template driver froms is done by adding validator directives to the HTML elements. Some built-in validators:
+![](doc/angularValidators.png)
+We can also create custom validators if none of these suit our needs.
+
+### Add validation
+
+Lets add the required attribute to the first name. We do that just by adding 'required'.
+But this would display an error message even when the user first loads the page, which is not nice user experience.
+The ngModel creates a form control that tracks the state of a single element:
+IsTouched, IsDirty, etc..
+So we create a template variable to access the form control:
+<input placeholder="First Name" [(ngModel)] = "contact.firstName" required #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
+<em \*ngIf="firstName.invalid && firstName.touched">Please enter the first name.</em>
+Multiple validators start to add complexity. Errors messages should be targeted to the validation operation that is actually failing.
+We can leverage the errors object. If the required validation fails, the erros object will have a required property, for example.
+<input placeholder="First Name" [(ngModel)] = "contact.firstName" required minlength="3" #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
+<em *ngIf="firstName.errors?.['required'] && firstName.touched">Please enter the first name.</em>
+<em *ngIf="firstName.errors?.['minlength'] && firstName.touched">First name needs at least 3 characters.</em>
+
+        We use null operator because the property might not even exist if there are no errors. To access nullable properties typsecript requires the braket syntax.
+
+### Validating form groups and forms
+
+Previously we added nggroups directives to phone and address and we also passed the ngForm as an argument to the save method.
+Behind the scenes, angular creates form groups for our address and phone fields.
+To access that we can create another template variable:
+
+<div class="address" ngModelGroup="address" #addressGroup = "ngModelGroup">
+
+If any of the fields of these forms groups is invalid, the whole group is invalid.
+So we can levarage this and have a generic validation for a group of fields, for example:
+
+      <em *ngIf="addressGroup.invalid && addressGroup.dirty">Incomplete address.</em>
+
+If we add a required attribut to all the address fields, we can use the whole group to access if the state is valid, instead of checking all individal fields.
+Our entire form is also a form group. We can levaregae this to prevent submit if the entire form is not valid:
+<button class="primary" type="submit" [disabled] ="contactForm.invalid" >Save</button>
+
+## Custom validator
+
+They are quite easy to implement. They need to implement a validator interface. See this:
+import {Directive} from "@angular/core";
+import {AbstractControl, NG_VALIDATORS, Validator, ValidationErrors} from "@angular/forms"
+
+```
+import { Directive } from '@angular/core'
+import {
+    NG_VALIDATORS,
+    AbstractControl,
+    ValidationErrors,
+    Validator,
+} from '@angular/forms'
+
+@Directive({
+    selector: '[restrictedWords]',
+    standalone: true,
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            multi: true,
+            useExisting: RestrictedWordsValidator,
+        },
+    ],
+})
+export class RestrictedWordsValidator implements Validator {
+    validate(control: AbstractControl): null | ValidationErrors {
+        if (!control.value) return null
+
+        return control.value.includes('foo') ? { restrictedWords: true } : null
+    }
+}
+
+```
+
+Inside the validate method is where we put the validation logic.
+The Angular Forms module needs to know what are the multiple custom validation directives available. It does so by asking the dependency injection system for the NG_VALIDATORS injection token (a sort of unique dependency injection key, that uniquely identifies a dependency).
+
+This dependency in of type multi:true meaning that it includes multiple values, and not just one value. This is to be expected, as there are many custom validator directives, and not just one.
+
+In a project using modules we would make this validator available for use by importing them into a module. Because we use standalone components, we just import where needed (components class.)
+
+So how to use our custom validator? We need to import now the directive in the component classe files, for the components that will need this validator. Then we just include the selector in the template of the same components:
+
+```
+import { RestrictedWordsValidator } from '../validators/restricted-words-validator.directive'
+```
+
+And then , in the template file:
+
+      <textarea placeholder="notes" rows ="3" [(ngModel)] = "contact.notes" name="notes" #notes="ngModel" restrictedWords [class.error] = "notes.invalid" ></textarea>
+    <em *ngIf="notes.errors?.['restrictedWords']">Restricted words.</em>
+
+We know our custom validator will fail because we can check the errors object. The errors object will have a property with the name of our validator selector.
+We cant pass additional parameters to the validate function because we implement the validator interface. But we can pass and retrieve data from the validator.
+We do that like we do for all the other directives: input decorator.
+
+```
+@Input('restrictedWords') restrictedWords : string [] = []
+```
+
+Then in our template we can define what are the restriced words:
+<textarea placeholder="notes" rows ="3" [(ngModel)] = "contact.notes" name="notes" #notes="ngModel" [restrictedWords] = "['foo', 'bar']" [class.error] = "notes.invalid" ></textarea>
+
+So we change the validator to return the list of invalid words like this:
+
+```
+export class RestrictedWordsValidator implements Validator {
+    @Input() restrictedWords: string[] = []
+    validate(control: AbstractControl): null | ValidationErrors {
+        if (!control.value) return null
+
+        // list of invalidate words.
+        const invalidwords = this.restrictedWords.map((w) =>
+            control.value.includes(w) ? w : null
+        ).filter(w => w !== null);
+
+        // here we actually set as the return of this validatior the list of invalid words joined by a comma
+        return invalidwords.length > 0 ? { restrictedWords: invalidwords.join(',') } : null
+    }
+}
+```
+
+And then we show the invalid words in an error message (easy peasy):
+<em \*ngIf="notes.errors?.['restrictedWords']">Restricted words {{notes.errors?.['restrictedWords']}}</em>
+
+## Custom controls and controlValuAccessors
+
+Like we have seen Angular does not have a control value accessor to work with dates, so we work with dates by using strings. We can also create our default control value accessor though.
+An accessor is a directive and we can configure the directive selector to be used with all input fields of type date:
+
+```
+@Directive({
+  selector: 'input([type=date])[ngModel],input([type=date])[formControl],input([type=date])[formControlName]',
+  // with form control and form control name we make this directive available to reactive forms
+  standalone: true
+})
+```
