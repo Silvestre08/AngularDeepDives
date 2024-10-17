@@ -1,61 +1,61 @@
 {
-  "hash": "9657700b",
-  "configHash": "6bd9b722",
+  "hash": "faca785a",
+  "configHash": "34d620b7",
   "lockfileHash": "3c68393a",
-  "browserHash": "3e97a5ec",
+  "browserHash": "f4ba04da",
   "optimized": {
     "@angular/common": {
       "src": "../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "0f19eafe",
+      "fileHash": "5ec2b859",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "68a25c48",
+      "fileHash": "9e2819fd",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "c6b75e3a",
+      "fileHash": "1e601a85",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "c69a55f4",
+      "fileHash": "bb2867f4",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "ec8a4d6e",
+      "fileHash": "b79e21d4",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "459e1c68",
+      "fileHash": "396ace24",
       "needsInterop": false
     },
     "angular-in-memory-web-api": {
       "src": "../../../../../node_modules/angular-in-memory-web-api/fesm2022/angular-in-memory-web-api.mjs",
       "file": "angular-in-memory-web-api.js",
-      "fileHash": "2dd4d7f7",
+      "fileHash": "45041a27",
       "needsInterop": false
     },
     "nanoid": {
       "src": "../../../../../node_modules/nanoid/index.browser.js",
       "file": "nanoid.js",
-      "fileHash": "cf334827",
+      "fileHash": "eec86806",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "39ea1433",
+      "fileHash": "ef466726",
       "needsInterop": false
     }
   },

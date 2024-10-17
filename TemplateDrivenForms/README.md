@@ -352,15 +352,52 @@ export class RestrictedWordsValidator implements Validator {
 And then we show the invalid words in an error message (easy peasy):
 <em \*ngIf="notes.errors?.['restrictedWords']">Restricted words {{notes.errors?.['restrictedWords']}}</em>
 
-## Custom controls and controlValuAccessors
+## Custom controls and controlValueAccessors
 
 Like we have seen Angular does not have a control value accessor to work with dates, so we work with dates by using strings. We can also create our default control value accessor though.
-An accessor is a directive and we can configure the directive selector to be used with all input fields of type date:
+An accessor is a directive and we can configure the directive selector to be used with all input fields of type date.
+To remember that a ControlValueAccessor handles updating an HTML element value when its bound data model field changes. It is also responsible to update the data model when the HTML element's value changes.
+So basically we need to implement the ControlValueAccessor interface. The functions to implement are the following:
 
 ```
 @Directive({
   selector: 'input([type=date])[ngModel],input([type=date])[formControl],input([type=date])[formControlName]',
-  // with form control and form control name we make this directive available to reactive forms
   standalone: true
 })
+export class DateValueAccessorDirective implements ControlValueAccessor {
+
+  constructor(private element: ElementRef) {
+
+   }
+
+  // called whenever the bound data model field value changes, updating the html element
+  writeValue(newValue: any): void {
+    if(newValue instanceof Date){
+
+    this.element.nativeElement.value = newValue.toISOString().split('T')[0] 
+    }
+    //yyyy-mm-dd
+  }
+
+  // to handle the changes in the html elements we need to register to the events. We fetch the event target property as date
+  // That will return the text of the input element as a date. sowhen the input event fires it will call our onChange method and pass in the valueAsDate value.
+  @HostListener('input', ['$event.target.valueAsDate']) private onChange!: Function
+  
+  // when angular sees a control value access directive it call the register on change and provides the callbackfuntion we need to call to update our data model
+  // so our function fetches the value as date from our input element and we pass the value as an actual date object to the callback angular provides us.
+  registerOnChange(fn: Function): void {
+   this.onChange = (valueAsDate: Date) => {fn(valueAsDate)};
+  }
+
+  @HostListener('blur', []) private onTouched!: Function
+  registerOnTouched(fn: Function): void {
+    this.onTouched = fn;
+  }
+  setDisabledState?(isDisabled: boolean): void {
+    throw new Error('Method not implemented.');
+  }
+}
 ```
+In the component classe file the new control value accessor needs to be imported.
+
+## Custom input controls
