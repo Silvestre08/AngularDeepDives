@@ -374,7 +374,7 @@ export class DateValueAccessorDirective implements ControlValueAccessor {
   writeValue(newValue: any): void {
     if(newValue instanceof Date){
 
-    this.element.nativeElement.value = newValue.toISOString().split('T')[0] 
+    this.element.nativeElement.value = newValue.toISOString().split('T')[0]
     }
     //yyyy-mm-dd
   }
@@ -382,7 +382,7 @@ export class DateValueAccessorDirective implements ControlValueAccessor {
   // to handle the changes in the html elements we need to register to the events. We fetch the event target property as date
   // That will return the text of the input element as a date. sowhen the input event fires it will call our onChange method and pass in the valueAsDate value.
   @HostListener('input', ['$event.target.valueAsDate']) private onChange!: Function
-  
+
   // when angular sees a control value access directive it call the register on change and provides the callbackfuntion we need to call to update our data model
   // so our function fetches the value as date from our input element and we pass the value as an actual date object to the callback angular provides us.
   registerOnChange(fn: Function): void {
@@ -398,6 +398,9 @@ export class DateValueAccessorDirective implements ControlValueAccessor {
   }
 }
 ```
+
 In the component classe file the new control value accessor needs to be imported.
 
 ## Custom input controls
+
+We created a new component first, called profile-icon-selector that shows all icons if the user did not select an icon.
