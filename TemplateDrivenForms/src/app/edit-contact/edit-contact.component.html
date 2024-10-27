@@ -6,7 +6,7 @@
     <section>
       <nav>Name/Info</nav>
       <div>
-        <con-profile-icon-selector></con-profile-icon-selector>
+        <con-profile-icon-selector [(ngModel)]="contact.icon" name="icon"></con-profile-icon-selector>
         <input type="hidden" [ngModel]="contact.id" name="id"/>
         <input placeholder="First Name" [(ngModel)] = "contact.firstName" required minlength="3" #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
         <em *ngIf="firstName.errors?.['required'] && firstName.touched">Please enter the first name.</em>
@@ -24,17 +24,19 @@
       </div>
     </section>
     <section>
-      <nav>Phone</nav>
-      <div class="flex-column" ngModelGroup="phone">
+      <nav>Phones</nav>
+      <div class="flex-column" ngModelGroup="phones">
+        <div *ngFor="let phone of contact.phones; let i = index" class="flex-column">
         <div class="flex-group">
-          <input placeholder="Phone" [(ngModel)] = "contact.phone.phoneNumber" name="phoneNumber" />
-          <img src="/assets/plus-grey-blue.png" class="add" />
+          <input placeholder="Phone" [(ngModel)] = "phone.phoneNumber" name="phoneNumber{{i}}" />
+          <img src="/assets/plus-grey-blue.png" class="add" (click) = "addPhone()" />
         </div>
         <div class="radio">
           <span *ngFor="let phonetype of phoneValueTypes">
-          <input type="radio" [value]="phonetype.value" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> {{phonetype.title}}
+          <input type="radio" [value]="phonetype.value" [(ngModel)] = "phone.phoneType" name="phoneType{{i}}"> {{phonetype.title}}
         </span>
         </div>
+      </div>
       </div>
     </section>
     <section>

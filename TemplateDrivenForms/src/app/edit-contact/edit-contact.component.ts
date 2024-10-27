@@ -22,16 +22,17 @@ export class EditContactComponent implements OnInit {
     addressValueTypes = addressValueTypes
     contact: Contact = {
         id: '',
+        icon: '',
         personal: false,
         firstName: '',
         lastName: '',
         dateOfBirth: null,
         favoritesRanking: 0,
         notes: '',
-        phone: {
+        phones: [{
             phoneNumber: '',
             phoneType: '',
-        },
+        }],
         address: {
             streetAddress: '',
             city: '',
@@ -58,9 +59,17 @@ export class EditContactComponent implements OnInit {
 
     saveContact(form: NgForm) {
         console.log(form.value)
-        this.contactService.saveContact(form.value).subscribe({
+        this.contactService.saveContact(this.contact).subscribe({
+        // this.contactService.saveContact(form.value).subscribe({
             //  this.contactService.saveContact(this.contact).subscribe({
             next: () => this.router.navigate(['/contacts']),
         })
+    }
+
+    addPhone(){
+        this.contact.phones.push({
+            phoneNumber: '',
+            phoneType: '',
+    });
     }
 }

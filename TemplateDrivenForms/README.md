@@ -404,3 +404,33 @@ In the component classe file the new control value accessor needs to be imported
 ## Custom input controls
 
 We created a new component first, called profile-icon-selector that shows all icons if the user did not select an icon.
+The thing is that this icon is still not working with our data model by default.
+To wire up a costum component with data model we need to implement the control value accessor interface.
+After that, we can use the ngModel directive directly on our custom component.
+
+## Dynamic forms
+
+Dynamic forms are handy for scenarios like adding user contacts for example. We should be able to add within the same form as many contacts as we would like.
+first step is to verify if our data models support such structure.
+There are challenges with dynamic forms and using the ngForm the way we were using it until now with the ngSubmit. In the phone example, once we click submit the object will never be valid. TThe object is going to have repatable properties for every contact added into the collection.
+We need to work directly with the data models instead of working with ngForm like done until now.
+
+This is a limitation of the ngForm. It mirrors the HTML structure. When we submit the form the object looks like this:
+![](doc/phones.png)
+
+We do not have an array. We have a phones object with repeatable properties instead. So the object of ngForm and our model are not actually the same. Given the fact we have ngModel and 2 way data binding everywhere we can just pass the model instead:
+
+```
+    saveContact(form: NgForm) {
+        console.log(form.value)
+        this.contactService.saveContact(this.contact).subscribe({
+        // this.contactService.saveContact(form.value).subscribe({
+            //  this.contactService.saveContact(this.contact).subscribe({
+            next: () => this.router.navigate(['/contacts']),
+        })
+    }
+
+```
+
+So instead of submitting the ngForm value into our save contact.
+As a last exercise of this module, let's add functionality to the puls button to just add a new phone field. Given the fact we use ngForm to render the html dinamically, we just need to add an empty object to the array of phones.

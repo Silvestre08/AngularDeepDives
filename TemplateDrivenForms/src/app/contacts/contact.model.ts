@@ -1,12 +1,13 @@
 export interface Contact {
     id: string
+    icon: string
     personal: boolean
     firstName: string
     lastName: string
      dateOfBirth: Date | null,
     //dateOfBirth: string
     favoritesRanking: number | null
-    phone: Phone
+    phones: Phone[]
     address: Address
     notes: string
 }
