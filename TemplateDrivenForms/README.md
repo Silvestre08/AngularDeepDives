@@ -271,15 +271,15 @@ Lets add the required attribute to the first name. We do that just by adding the
 But this would display an error message even when the user first loads the page, which is not a nice user experience.
 The ngModel creates a form control that tracks the state of a single element: IsTouched, IsDirty, etc..
 
-So we create a template variable to access the form control:
+So we create the template variable #firstName to access the form control:
 
 ```
 <input placeholder="First Name" [(ngModel)] = "contact.firstName" required #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
-<em \*ngIf="firstName.invalid && firstName.touched">Please enter the first name.</em>
+<em *ngIf="firstName.invalid && firstName.touched">Please enter the first name.</em>
 ```
 
 Multiple validators start to add complexity. Error messages should be targeted to the validation operation that is actually failing.
-We can leverage the errors object. If the required validation fails, the errors object will have a required property, for example:
+So for that, we can leverage the errors object. If the required validation fails, the errors object will have a required property, for example:
 
 ```
 <input placeholder="First Name" [(ngModel)] = "contact.firstName" required minlength="3" #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
@@ -287,32 +287,39 @@ We can leverage the errors object. If the required validation fails, the errors 
 <em *ngIf="firstName.errors?.['minlength'] && firstName.touched">First name needs at least 3 characters.</em>
 ```
 
-        We use null operator because the property might not even exist if there are no errors. To access nullable properties typsecript requires the braket syntax.
+We use null operator because the property might not even exist if there are no errors. To access nullable properties typsecript requires the bracket syntax.
 
 ### Validating form groups and forms
 
-Previously we added nggroups directives to phone and address and we also passed the ngForm as an argument to the save method.
+Previously we added ngGroup directives to phone and address, and we've also passed the ngForm as an argument to the save method.
 Behind the scenes, angular creates form groups for our address and phone fields.
 To access that we can create another template variable:
 
+```
 <div class="address" ngModelGroup="address" #addressGroup = "ngModelGroup">
+```
 
 If any of the fields of these forms groups is invalid, the whole group is invalid.
 So we can levarage this and have a generic validation for a group of fields, for example:
 
+```
       <em *ngIf="addressGroup.invalid && addressGroup.dirty">Incomplete address.</em>
+```
 
-If we add a required attribut to all the address fields, we can use the whole group to access if the state is valid, instead of checking all individal fields.
-Our entire form is also a form group. We can levaregae this to prevent submit if the entire form is not valid:
+If we add a required attribute to all the address fields, we can use the whole group to access if the state is valid, instead of checking all individal fields.
+Our entire form is also a form group. We can leverage this to prevent submissions, if the entire form is not valid:
+
+```
 <button class="primary" type="submit" [disabled] ="contactForm.invalid" >Save</button>
+```
 
 ## Custom validator
 
 They are quite easy to implement. They need to implement a validator interface. See this:
-import {Directive} from "@angular/core";
-import {AbstractControl, NG_VALIDATORS, Validator, ValidationErrors} from "@angular/forms"
 
 ```
+import {Directive} from "@angular/core";
+import {AbstractControl, NG_VALIDATORS, Validator, ValidationErrors} from "@angular/forms"
 import { Directive } from '@angular/core'
 import {
     NG_VALIDATORS,
@@ -342,12 +349,12 @@ export class RestrictedWordsValidator implements Validator {
 
 ```
 
-Inside the validate method is where we put the validation logic.
+We put the validation logic inside the validate method.
 The Angular Forms module needs to know what are the multiple custom validation directives available. It does so by asking the dependency injection system for the NG_VALIDATORS injection token (a sort of unique dependency injection key, that uniquely identifies a dependency).
 
 This dependency in of type multi:true meaning that it includes multiple values, and not just one value. This is to be expected, as there are many custom validator directives, and not just one.
 
-In a project using modules we would make this validator available for use by importing them into a module. Because we use standalone components, we just import where needed (components class.)
+In a project using modules, we would make this validator available for use by importing them into a module. Because we use standalone components, we just import where needed (component classes).
 
 So how to use our custom validator? We need to import now the directive in the component classe files, for the components that will need this validator. Then we just include the selector in the template of the same components:
 
@@ -355,21 +362,26 @@ So how to use our custom validator? We need to import now the directive in the c
 import { RestrictedWordsValidator } from '../validators/restricted-words-validator.directive'
 ```
 
-And then , in the template file:
+And then, in the template file:
 
+```
       <textarea placeholder="notes" rows ="3" [(ngModel)] = "contact.notes" name="notes" #notes="ngModel" restrictedWords [class.error] = "notes.invalid" ></textarea>
     <em *ngIf="notes.errors?.['restrictedWords']">Restricted words.</em>
+```
 
 We know our custom validator will fail because we can check the errors object. The errors object will have a property with the name of our validator selector.
-We cant pass additional parameters to the validate function because we implement the validator interface. But we can pass and retrieve data from the validator.
-We do that like we do for all the other directives: input decorator.
+We can't pass additional parameters to the validate function because we implement the validator interface. But we can pass and retrieve data from the validator.
+We do that like we do for all the other directives:input decorator.
 
 ```
 @Input('restrictedWords') restrictedWords : string [] = []
 ```
 
 Then in our template we can define what are the restriced words:
+
+```
 <textarea placeholder="notes" rows ="3" [(ngModel)] = "contact.notes" name="notes" #notes="ngModel" [restrictedWords] = "['foo', 'bar']" [class.error] = "notes.invalid" ></textarea>
+```
 
 So we change the validator to return the list of invalid words like this:
 
@@ -391,14 +403,17 @@ export class RestrictedWordsValidator implements Validator {
 ```
 
 And then we show the invalid words in an error message (easy peasy):
-<em \*ngIf="notes.errors?.['restrictedWords']">Restricted words {{notes.errors?.['restrictedWords']}}</em>
+
+```
+<em *ngIf="notes.errors?.['restrictedWords']">Restricted words {{notes.errors?.['restrictedWords']}}</em>
+```
 
 ## Custom controls and controlValueAccessors
 
-Like we have seen Angular does not have a control value accessor to work with dates, so we work with dates by using strings. We can also create our default control value accessor though.
-An accessor is a directive and we can configure the directive selector to be used with all input fields of type date.
+We have seen that Angular does not have a control value accessor to work with dates, so we work with dates by using strings. We can also create our default control value accessor though.
+An accessor is a directive, and we can configure the directive selector to be used with all input fields of type date.
 To remember that a ControlValueAccessor handles updating an HTML element value when its bound data model field changes. It is also responsible to update the data model when the HTML element's value changes.
-So basically we need to implement the ControlValueAccessor interface. The functions to implement are the following:
+We need to implement the ControlValueAccessor interface. The functions to implement are the following:
 
 ```
 @Directive({
@@ -420,12 +435,12 @@ export class DateValueAccessorDirective implements ControlValueAccessor {
     //yyyy-mm-dd
   }
 
-  // to handle the changes in the html elements we need to register to the events. We fetch the event target property as date
-  // That will return the text of the input element as a date. sowhen the input event fires it will call our onChange method and pass in the valueAsDate value.
+  // to handle the changes in the html elements we need to register to events. We fetch the event target property as date
+  // That will return the text of the input element as a date. When the input event fires it will call our onChange method and pass in the valueAsDate value.
   @HostListener('input', ['$event.target.valueAsDate']) private onChange!: Function
 
-  // when angular sees a control value access directive it call the register on change and provides the callbackfuntion we need to call to update our data model
-  // so our function fetches the value as date from our input element and we pass the value as an actual date object to the callback angular provides us.
+  // when angular sees a control value accessor directive, it calls the registerOnChange and provides the callback function we need to call to update our data model.
+  // Our function fetches the value as date from our input element and we pass the value as an actual date object to the callback angular provides us.
   registerOnChange(fn: Function): void {
    this.onChange = (valueAsDate: Date) => {fn(valueAsDate)};
   }
@@ -440,21 +455,21 @@ export class DateValueAccessorDirective implements ControlValueAccessor {
 }
 ```
 
-In the component classe file the new control value accessor needs to be imported.
+In the component class file, the new control value accessor needs to be imported.
 
 ## Custom input controls
 
-We created a new component first, called profile-icon-selector that shows all icons if the user did not select an icon.
+We created a new component first, called profile-icon-selector that shows all icons, if the user did not select an icon.
 The thing is that this icon is still not working with our data model by default.
-To wire up a costum component with data model we need to implement the control value accessor interface.
+To wire up a custom component with data model, using ngModel, we need to implement the control value accessor interface.
 After that, we can use the ngModel directive directly on our custom component.
 
 ## Dynamic forms
 
-Dynamic forms are handy for scenarios like adding user contacts for example. We should be able to add within the same form as many contacts as we would like.
-first step is to verify if our data models support such structure.
-There are challenges with dynamic forms and using the ngForm the way we were using it until now with the ngSubmit. In the phone example, once we click submit the object will never be valid. TThe object is going to have repatable properties for every contact added into the collection.
-We need to work directly with the data models instead of working with ngForm like done until now.
+Dynamic forms are handy for scenarios like adding user contacts for example. We should be able to add, within the same form, as many contacts as we would like.
+The first step is to verify if our data models support such structure. So we change the property phone to an array and renamed it phones.
+There are challenges with dynamic forms and using the ngForm the way we were using it until now with the ngSubmit. In the phone example, once we click submit, the object will never be valid. The object is going to have repatable properties for every contact added into the collection. This is not the form of an array like we have in our data model. This means that we cannot use the ngForm in our save method of the component class file. The objects are not identical.
+We then need to work directly with the data models, instead of working with ngForm.
 
 This is a limitation of the ngForm. It mirrors the HTML structure. When we submit the form the object looks like this:
 ![](doc/phones.png)
@@ -473,5 +488,12 @@ We do not have an array. We have a phones object with repeatable properties inst
 
 ```
 
-So instead of submitting the ngForm value into our save contact.
-As a last exercise of this module, let's add functionality to the puls button to just add a new phone field. Given the fact we use ngForm to render the html dinamically, we just need to add an empty object to the array of phones.
+As a last exercise of this module, let's add functionality to the puls button to just add a new phone field. Given the fact we use ngFor to render the html dinamically, we just need to add an empty object to the array of phones:
+
+```
+    addPhone(){
+        this.contact.phones.push({
+            phoneNumber: '',
+            phoneType: '',
+    });
+```
