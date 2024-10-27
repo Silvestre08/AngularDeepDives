@@ -118,7 +118,7 @@ And the button submit:
 ## Working with ngForm
 
 There is an alternative way to work with the values gathered from the HTML. Given that we imported the forms module, there is a directive behind the scenes that gets assigned to the template ngForm.
-We can get it using a template variable like this
+We can get it using a template variable like this:
 
 ```
   <form (ngSubmit)="saveContact()" #contactForm="ngForm">
@@ -145,7 +145,7 @@ Then in our component class:
 The output of that log of the form.value is:
 ![](doc/ngFormValue.png)
 
-See that on the ngForm the phone number and phone type are not nested in an object like in our model. All properties are at the root. We can fix that by adding a ngModelGroup: it surrounds multiple input elements.
+See that on the ngForm, the phone number and phone type are not nested in an object like in our model. All properties are at the root. We can fix that by adding a ngModelGroup. The ngModelGroup surrounds multiple input elements:
 
 ```
  <div class="flex-column" ngModelGroup="phone">
@@ -166,20 +166,27 @@ If we do the same for the address, our ngForm will match our data model and we c
 
 The thing that needs to be taken into account here is that form.value will only contain the values from the input fields but, when we fetch the data from the API, while loading the page, the objects come with an ID that is not present in the ngForm.
 In order to preserve that we can bind the id into a hidden (the users should not be messing with ids) input element:
+
+```
 <input type="hidden" [ngModel]="contact.id" name="id"/>
+```
 
 ## Form submitted
 
-It is important to know when a form has been submitted or not. In some cases, we want to prevent the same form being submitted twice. We can work with ngSubmitted class or with ngForm.Submitted property.
-Lets hide the buttons save and cancel and display a Saving button when the user submits the form, thus preventing the user to submit twice.
-Using ngForm:
+It is important to know when a form has been submitted or not. In some cases, we want to prevent the same form from being submitted twice. We can work with ngSubmitted class or with ngForm.Submitted property.
+As a practice exercise, let's hide the buttons save and cancel, and display a Saving button when the user submits the form, thus preventing the user to submit twice.
 
+The approach using ngForm:
+
+```
  <div class="buttons">
       <button *ngIf="!contactForm.submitted" class="secondary" type="button">Cancel</button>
       <button *ngIf="!contactForm.submitted" class="primary" type="submit" >Save</button>
       <button *ngIf="contactForm.submitted" disabled>Saving...</button>
     </div>
-We here use our template variable to inside the template hide the save button if the form has not been submitted.
+```
+
+We here use our template variable to, inside the template, hide the save button if the form has not been submitted yet.
 When the user submits the form angular adds the ngSubmitted class to our form and we can target it with css:
 
 button.saving{
