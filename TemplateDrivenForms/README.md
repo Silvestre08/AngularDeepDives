@@ -187,8 +187,9 @@ The approach using ngForm:
 ```
 
 We here use our template variable to, inside the template, hide the save button if the form has not been submitted yet.
-When the user submits the form angular adds the ngSubmitted class to our form and we can target it with css:
+When the user submits the form, Angular adds the ngSubmitted class to our form, and we can target it with css:
 
+```
 button.saving{
 display: none;
 }
@@ -200,20 +201,23 @@ display: none;
 form.ng-submitted button.saving{
 display: block;
 }
+```
 
-We add class saving to our saving button. So when the form gets the ng.submitted class, we tartget the saving button to become visible and hide all the other buttons.
+We added the class saving to our saving button. So when the form gets the ng.submitted class, we tartget the saving button to become visible and hide all the other buttons.
 
 ## Working with common user controls
 
 ### Radio buttons
 
-Just like you would do in plain html we declare each individual radio button on the template but we give the same name to all of them, so they work as a group. :
+Just like you would do in plain html, we declare each individual radio button on the template but we give the same name to all of them, so they work as a group :
 
+```
         <div class="radio">
           <input type="radio" value="mobile" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> Mobile
           <input type="radio" value="work" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> Work
           <input type="radio" value="other" [(ngModel)] = "contact.phone.phoneType" name="phoneType"> Other
         </div>
+```
 
 There is an alternative way of doing it. We can define an array with ngFor (we have to declare the phoneValueTypes):
 
@@ -227,46 +231,61 @@ A select list works similar to radio buttons. Actually a little simpler and the 
 
 ### Checkboxes
 
-Check boxes in angular have some uniqueness to them. In plain HTML we could set the value attribute of a checkbox
-to a string. Angular just ignores that value, even if we delcare it on the model feedbing the checkbox, This happens because of the source directive angular creates when we apply ngModel to the checkbox.
-We have a checkbox value accessor, that sits between the html and the model and it only checks for the checked state of the checkbox.
+Check boxes in angular have some uniqueness to them. In plain HTML we could set the value attribute of a checkbox to a string. Angular just ignores that value, even if we delcare it on the model feeding the checkbox. This happens because of the source directive angular creates when we apply ngModel to the checkbox.
+We have a checkbox value accessor, that sits between the html and the model, and it only checks for the checked state of the checkbox.
 
 ### Numeric inputs
 
 When we declare a type as numeric in typescript, the numeric type is just a development aid. If we log the type in the console of our favouritesRanking, we see string.
-The element has the default control value accessor, and this fdefault value accessor always updates the form model with a string value.
-Angular documentation says that there is a numeric value accessor. To use that we just change the input attribut to numberÇ
+The element has the default control value accessor, and this default value accessor always updates the form model with a string value.
+Angular documentation says that there is a numeric value accessor. To use that we just change the input attribut to number:
+
+```
 <input placeholder="Favorites Ranking" type="number" [(ngModel)] = "contact.favoritesRanking" name="favoritesRanking" />
+```
+
 It is a good practice to use numeric value accessor for numeric types. The console would now print number instead of string.
 If we use range, angular uses range value accessor. It is still numeric.
 
 ### Date fields
 
-If we just use the default input text, it means we just use the default value accessor behind the scenes which treats all values as strings regardless of data types. Angular does not have an out-of-the-box date value accessor. So how do we work with dates?
+If we just use the default input text, it means we just use the default value accessor that, behind the scenes, treats all values as strings, regardless of data types. Angular does not have an out-of-the-box date value accessor. So how do we work with dates?
 
-We can create our own cystom control value accessor or just handle dates as strings which is not a bad path to go (dates are a mess in javascript and not een support in json).
-We jus use din this module : .toISOString().split('T')[0],
+We can create our own cystom control value accessor or just handle dates as strings, which is not a bad path to go (dates are a mess in javascript and not even supported in json).
+We just use this module :
+
+```
+.toISOString().split('T')[0],
+```
 
 ## Validating user inputs
 
 Validation in template driver froms is done by adding validator directives to the HTML elements. Some built-in validators:
 ![](doc/angularValidators.png)
+
 We can also create custom validators if none of these suit our needs.
 
 ### Add validation
 
-Lets add the required attribute to the first name. We do that just by adding 'required'.
-But this would display an error message even when the user first loads the page, which is not nice user experience.
-The ngModel creates a form control that tracks the state of a single element:
-IsTouched, IsDirty, etc..
+Lets add the required attribute to the first name. We do that just by adding the word 'required'.
+But this would display an error message even when the user first loads the page, which is not a nice user experience.
+The ngModel creates a form control that tracks the state of a single element: IsTouched, IsDirty, etc..
+
 So we create a template variable to access the form control:
+
+```
 <input placeholder="First Name" [(ngModel)] = "contact.firstName" required #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
 <em \*ngIf="firstName.invalid && firstName.touched">Please enter the first name.</em>
-Multiple validators start to add complexity. Errors messages should be targeted to the validation operation that is actually failing.
-We can leverage the errors object. If the required validation fails, the erros object will have a required property, for example.
+```
+
+Multiple validators start to add complexity. Error messages should be targeted to the validation operation that is actually failing.
+We can leverage the errors object. If the required validation fails, the errors object will have a required property, for example:
+
+```
 <input placeholder="First Name" [(ngModel)] = "contact.firstName" required minlength="3" #firstName="ngModel" name="firstName" [class.error]="firstName.invalid && firstName.touched" />
 <em *ngIf="firstName.errors?.['required'] && firstName.touched">Please enter the first name.</em>
 <em *ngIf="firstName.errors?.['minlength'] && firstName.touched">First name needs at least 3 characters.</em>
+```
 
         We use null operator because the property might not even exist if there are no errors. To access nullable properties typsecript requires the braket syntax.
 
