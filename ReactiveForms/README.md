@@ -74,7 +74,7 @@ A control value accessor has 2 key methods: writeValue (when the value on our co
 We can inialize form controls with default values like this:
 
 ```
-firstName = new FormControl('Jim');
+firstName = new FormControl('Jimoo');
 ```
 
 When we want to fetch data from an api we can use the forms control set value method like this:
