@@ -30,3 +30,65 @@ Reactive forms may be better form complex forms with lots of backend logic, wher
 
 Before diving in, we are using an Angular in memory web api. So we simulate actually http calls to the server but in memory.
 When we click in a contact we navigate to the edit form. Check the Url we pass the id as the argument.
+
+## Adding reactive forms to a project
+
+The first step is to add the reactive forms module to an angular project.
+We just need to import it in the module we want to use it or, if we use standalone components, in the component directly. In this course we just imported it in the app module:
+
+```
+import { ReactiveFormsModule } from '@angular/forms';
+...
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    HttpClientInMemoryWebApiModule.forRoot(InMemoryContactsApi, { delay: 200 })
+  ],
+
+```
+
+Of course, we should only import in the modules we actually need it.
+Having plain html on our template file, we we will start by creating form controls for some input elements we already have. Starting with first name:
+
+```
+firstName = new FormControl();
+```
+
+This form control will be used to collect the first name value and perform validation, etc..
+We wire up with the input element using a form control binding:
+
+```
+        <input [formControl] = "firstName" placeholder="First Name" />
+
+```
+
+The formControl binding will make angular track field value, if it is dirty or touched, valid , etc
+This creates a one way binding between the component and the input element.
+Then it uses the input event to update the formscontrol value when the input value changes. How does angular do that?
+What is the piece in the middle that makes that happen?
+![](doc/controlvalueaccessor.png)
+The magic is done by a directive called ControlValueAccessor. When we use formControl binding Angular attaches a control value accessor directive to the input element.
+A control value accessor has 2 key methods: writeValue (when the value on our component class changes, angular updates the input element) and onChange (when the input element changes value, we update the component class).
+We can inialize form controls with default values like this:
+
+```
+firstName = new FormControl('Jim');
+```
+
+When we want to fetch data from an api we can use the forms control set value method like this:
+
+```
+ ngOnInit() {
+    const contactId = this.route.snapshot.params['id'];
+    if (!contactId) return
+
+    this.contactsService.getContact(contactId).subscribe(
+      (contact) => {
+        if(!contact) return;
+        this.firstName.setValue(contact.firstName)
+      }
+    )
+  }
+```
