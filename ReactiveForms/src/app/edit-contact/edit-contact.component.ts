@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ContactsService } from '../contacts/contacts.service';
 
@@ -9,10 +9,13 @@ import { ContactsService } from '../contacts/contacts.service';
 })
 export class EditContactComponent implements OnInit {
   constructor(private route: ActivatedRoute, private contactsService: ContactsService) { }
-  firstName = new FormControl('Jim');
-  lastName = new FormControl();
-  dateOfBirth = new FormControl();
-  favoritesRank = new FormControl();
+  contactForm = new FormGroup({
+    firstName: new FormControl,
+    lastName: new FormControl,
+    dateOfBirth: new FormControl,
+    favoritesRank: new FormControl,
+
+  });
 
   ngOnInit() {
     const contactId = this.route.snapshot.params['id'];
@@ -21,16 +24,16 @@ export class EditContactComponent implements OnInit {
     this.contactsService.getContact(contactId).subscribe(
       (contact) => {
         if(!contact) return;        
-        this.firstName.setValue(contact.firstName)
-        this.lastName.setValue(contact.lastName)
-        this.dateOfBirth.setValue(contact.dateOfBirth)
-        this.favoritesRank.setValue(contact.favoritesRanking)
+        this.contactForm.controls.firstName.setValue(contact.firstName)
+        this.contactForm.controls.lastName.setValue(contact.lastName)
+        this.contactForm.controls.dateOfBirth.setValue(contact.dateOfBirth)
+        this.contactForm.controls.favoritesRank.setValue(contact.favoritesRanking)
       }
     )
   }
 
   saveContact() {
-    console.log(this.firstName.value);
+    console.log(this.contactForm.value);
 
   }
 }
