@@ -92,3 +92,62 @@ When we want to fetch data from an api we can use the forms control set value me
     )
   }
 ```
+
+## Form groups
+
+Form groups make form validation easier. It also make feeding the form with data easy too. Form groups can group form controls and can be created like this:
+
+```
+  contactForm = new FormGroup({
+    firstName: new FormControl,
+    lastName: new FormControl,
+    dateOfBirth: new FormControl,
+    favoritesRank: new FormControl,
+
+  });
+```
+
+Now the way we access the form controls changes to this:
+
+```
+        this.contactForm.controls.firstName.setValue(contact.firstName)
+```
+
+The binding in the template changes as well. We can bind the form to our form group. When we do that each input element inside the form only needs the form control name attributte. The form control name attribute needs to match the name of the property of the form control object inside the group:
+
+```
+ <form [formGroup]="contactForm">
+    <section>
+      <nav>Name/Info</nav>
+      <div>
+        <input formControlName = "firstName" placeholder="First Name" />
+```
+
+## Submitting the form
+
+The way we are saving so far is not correct. The proper html standard is to submit the form. Submitting the form correctly is also more accessbile to the user by allowing it to use the enter key.
+For submitting the form, we use the ngSumit direct at the form level:
+
+```
+  <form [formGroup]="contactForm" ngSubmit="saveContact()">
+
+```
+
+The save button needs to be changed to type submit. We also do not need to bind to the save method anymore:
+
+```
+      <button class="primary" type="submit">Save</button>
+
+```
+
+Having a form group we can easly access all form controls with value property:
+
+```
+  saveContact() {
+    console.log(this.contactForm.value);
+
+  }
+```
+
+The value property of the form group is an javascript object with properties equivalent to the form controls defined on it:
+![](doc/ngformgroup.PNG)
