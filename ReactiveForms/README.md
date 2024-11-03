@@ -203,4 +203,34 @@ Of ocurse, and populate this elements during loading, following the hierarchy of
         this.contactForm.controls.phone.controls.phoneNumber.setValue(contact.phone.phoneNumber);
 ```
 
-If we do this with all the properties things start to get a little messy. It can be imporved with a FormBuilder.
+If we do this with all the properties things start to get a little messy. It can be improved with a FormBuilder. If the form builder object matchs the contact interface type we can remove all the initialization boilerplate and initialize the form like this
+
+```
+this.contactForm.setValue(contact);
+```
+
+We initialize the contact form like this:
+
+```
+  contactForm = this.fb.nonNullable.group({
+    id: '',
+    firstName: '',
+    lastName: '',
+    dateOfBirth: <Date | null> null,
+    favoritesRanking: <number | null> null,
+    phone: this.fb.nonNullable.group({
+      phoneNumber: '',
+      phoneType: '',
+    }),
+    address: this.fb.nonNullable.group({
+      streetAddress: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      addressType: '',
+    })
+  });
+```
+
+The fb is of type FormBuilder.
+We can use this.contactForm.PatchValue to initialize just some of the fields and not the entire form
