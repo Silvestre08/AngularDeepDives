@@ -151,3 +151,56 @@ Having a form group we can easly access all form controls with value property:
 
 The value property of the form group is an javascript object with properties equivalent to the form controls defined on it:
 ![](doc/ngformgroup.PNG)
+
+Form groups do not include properties that are disabled in the HTML interface, so typescript knows that a form group might not have certain properties and gives us an error if we use the form group value directly in our save contact servicr method. One way to solve this is to mark all fields as optional in the contact interface.
+If we would have all the properties as form controls in our form group we could use form.getRawValue().
+A third wat to solve, which is the better one for our use case is to chage the contact service to accept a partial contract:
+
+```
+saveContact(contact: Partial<Contact>)
+```
+
+This is the best for this use case because we not expect users to fill every single property like contact id, or non mandatory fields etc.
+The id is important though because contact service checks if the contact has an id to verify if it should update an existing contact or create a new one. We can save the id in the component or add it to the form group. We can add it to the form group without adding it to the html template (which we shouldn't).
+
+### Nested Form groups
+
+So far we have isolated form controls. What about nested forms? Our object Phone is for example, an object itself. The same for address.
+We can just create nested form groups with form controls. Later this can also help us with field group validation:
+Our form group now looks like this:
+
+```
+    address: new FormGroup({
+      streetAddress: new FormControl,
+      city: new FormControl,
+      state: new FormControl,
+      postalCode: new FormControl,
+      addressType: new FormControl,
+    })
+```
+
+In order to save we can use getRawValue because phone and addresses can be partial objects and angular might infer they might not exist.
+
+```
+    this.contactsService.saveContact(this.contactForm.getRawValue()).subscribe({
+      next: () => this.router.navigate(['/contacts'])
+    })
+```
+
+Last step is to wire up in the html template with a directive formGroupName for the phone container and formControlName for each phone fields:
+
+```
+     <div formGroupName="phone" class="flex-column">
+        <div class="flex-group">
+          <input formControlName = "phoneNumber" placeholder="Phone" />
+          <img src="/assets/plus-grey-blue.png" class="add" />
+        </div>
+```
+
+Of ocurse, and populate this elements during loading, following the hierarchy of form groups:
+
+```
+        this.contactForm.controls.phone.controls.phoneNumber.setValue(contact.phone.phoneNumber);
+```
+
+If we do this with all the properties things start to get a little messy. It can be imporved with a FormBuilder.
