@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ContactsService } from '../contacts/contacts.service';
 
 @Component({
@@ -8,13 +8,24 @@ import { ContactsService } from '../contacts/contacts.service';
   styleUrls: ['./edit-contact.component.css']
 })
 export class EditContactComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private contactsService: ContactsService) { }
-  contactForm = new FormGroup({
-    firstName: new FormControl,
-    lastName: new FormControl,
-    dateOfBirth: new FormControl,
-    favoritesRank: new FormControl,
-
+  constructor(private route: ActivatedRoute, private contactsService: ContactsService, private router: Router, private fb: FormBuilder) { }
+  contactForm = this.fb.nonNullable.group({
+    id: '',
+    firstName: '',
+    lastName: '',
+    dateOfBirth: <Date | null> null,
+    favoritesRanking: <number | null> null,
+    phone: this.fb.nonNullable.group({
+      phoneNumber: '',
+      phoneType: '',
+    }),
+    address: this.fb.nonNullable.group({
+      streetAddress: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      addressType: '',
+    })
   });
 
   ngOnInit() {
@@ -23,17 +34,20 @@ export class EditContactComponent implements OnInit {
 
     this.contactsService.getContact(contactId).subscribe(
       (contact) => {
-        if(!contact) return;        
-        this.contactForm.controls.firstName.setValue(contact.firstName)
-        this.contactForm.controls.lastName.setValue(contact.lastName)
-        this.contactForm.controls.dateOfBirth.setValue(contact.dateOfBirth)
-        this.contactForm.controls.favoritesRank.setValue(contact.favoritesRanking)
+        if(!contact) return;
+        this.contactForm.setValue(contact);
       }
     )
   }
 
   saveContact() {
     console.log(this.contactForm.value);
+    this.contactsService.saveContact(this.contactForm.getRawValue()).subscribe({
+      next: () => this.router.navigate(['/contacts'])
+    })
+  }
 
+  cancel(){
+    this.router.navigate(['/contacts'])
   }
 }
