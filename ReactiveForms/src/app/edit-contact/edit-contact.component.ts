@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContactsService } from '../contacts/contacts.service';
+import { phoneTypeValues } from '../contacts/contact.model';
+import { addressTypeValues } from '../contacts/contact.model';
 
 @Component({
   templateUrl: './edit-contact.component.html',
@@ -9,12 +11,17 @@ import { ContactsService } from '../contacts/contacts.service';
 })
 export class EditContactComponent implements OnInit {
   constructor(private route: ActivatedRoute, private contactsService: ContactsService, private router: Router, private fb: FormBuilder) { }
+  phoneTypes = phoneTypeValues;
+  addressTypeValues = addressTypeValues;
+
   contactForm = this.fb.nonNullable.group({
     id: '',
+    isPersonal: false,
     firstName: '',
     lastName: '',
     dateOfBirth: <Date | null> null,
     favoritesRanking: <number | null> null,
+    notes: '',
     phone: this.fb.nonNullable.group({
       phoneNumber: '',
       phoneType: '',

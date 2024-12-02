@@ -234,3 +234,76 @@ We initialize the contact form like this:
 
 The fb is of type FormBuilder.
 We can use this.contactForm.PatchValue to initialize just some of the fields and not the entire form
+
+
+## Common input elements and data types
+### Radio buttons
+Setting formControlName in a group of radio buttons makes it possible use reactive forms with them. It also makes that exclusive to each other, if a set of radio buttons has the same formControlName property, otherwise they will be independent.
+This is the same as setting the name attribute to the same value with a traditional HTML form.
+
+### Select lists
+Simpler than radio buttons. We set the formControlName and then generate a lits of options.
+
+```
+      <select formControlName="addressType">
+            <option *ngFor="let addressType of addressTypeValues" [value]="addressType.value">{{addressType.title}}</option>
+          </select>
+```
+
+### checkboxes
+
+Lets add a check box to check if a contact is a personal contact.
+After adding a property to our model and to the form control we can add it to the template:
+```
+        <div>
+          <input type="checkbox" formControlName ="isPersonal"/>
+        </div>
+```
+We do not need to specify a value because reactive forms treat checkboxes as boolean
+When we apply the formControlName attribute to an input element of type checkbox, angular applies a special control value accessor into it: checkboxcontrovalueaccessor.
+even if we set the value of the input element to a string like 'foo' the this cva always ensures we have the type of boolean and not string (becasue the property is completely ignored).
+
+### Numeric input elements
+Our favourites ranking field is actually working as type string behind the scenes. It is a plain old input text element, and when we apply the formControlName directive, it is assigned the default cva, that it updates the elements as string.
+Angular has a numericValueAccessor, that can be used.So we need to change te type to number:
+```
+        <input formControlName = "favoritesRanking" type="number" placeholder="Favorites Ranking" />
+```
+This prevents the insertion of letters, etc
+
+### Range inputs
+We can also use range as a type (it will render as a slider control).
+Angular has a range value accessor that supplies numeric values.
+```
+        <div>
+          <span>Favourites Ranking:</span>
+          <input formControlName = "favoritesRanking" type="range" min="0" max="5" placeholder="Favorites Ranking" />
+          <span>{{contactForm.controls.favoritesRanking.value}}</span>
+        
+        </div>
+```
+### Text area
+Similar to other text input type elements.
+```
+    <section>
+      <nav>Notes</nav>
+      <textarea placeholder="Notes" rows="5" formControlName="notes"></textarea>
+    </section>
+```
+### Date fields
+The date field in the beginning looks a little ugly because it uses the default value accessor. We can try to improve it by using the date field like this:
+```
+    <input formControlName = "dateOfBirth" type="date" [value]="contactForm.controls.dateOfBirth.value | date:'yyyy-MM-dd'" 
+        placeholder="Date of Birth" />
+```
+Even when we use it like this, Angular still treats this value as a string. Angular does not have an out of the box value accessor for dates.
+the options we have are either create a custom valie accessor or just work with dates as string, which is fine most of the time.
+We can leave that pipe like that on the template (the type date gives us the date picker out of the box). Now, on our service we can just change the type to string and format the value accordingly:
+```
+// contact service
+    .pipe(map(c=> {c.dateOfBirth = c.dateOfBirth.split('T')[0];
+      return c
+    }));
+```
+
+## Validation reactive forms 
