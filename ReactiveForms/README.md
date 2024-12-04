@@ -1,6 +1,6 @@
 # Reactive forms
 
-Reactive forms are for complex forms than template driven forms. They are better as well if our preference is to have more code driven forms instead of html driven forms.
+Reactive forms are better suited for more complex forms than template driven forms. They are better as well if our preference is to have more code driven forms, instead of html driven forms.
 We are going to use the same template as we did for the course of template driven forms: edit user contacts.
 On a form, we usually want to track lots of flags per field:
 
@@ -306,4 +306,16 @@ We can leave that pipe like that on the template (the type date gives us the dat
     }));
 ```
 
-## Validation reactive forms 
+## Validation in reactive forms 
+We add validation to reactive forms by adding validators to form controls. 
+Out of the box validators in Angular:
+![](doc/Validators.PNG)
+In template driven forms, we would add the required attribute to an input control element directly on the template.
+In reactive forms, we create the form controls ourselves and we will add the validators in the component class directly. We can pass an array of validators to the form control constructor. 
+We are using form builder and we can do that in a similar way. See the required validator for the field first name:
+```
+  contactForm = this.fb.nonNullable.group({
+    id: '',
+    isPersonal: false,
+    firstName: ['', Validators.required],}) // required field validator
+ ```
