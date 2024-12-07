@@ -319,3 +319,26 @@ We are using form builder and we can do that in a similar way. See the required 
     isPersonal: false,
     firstName: ['', Validators.required],}) // required field validator
  ```
+ To show an error message when the first name is empty we can use the invalid property:
+ ```
+        <em *ngIf="contactForm.controls.firstName.invalid && contactForm.controls.firstName.touched ">Please enter a First Name</em>
+        // show when emppty and when field is touched so when creating a new contact we do not have an error immediatly.
+ ```
+ We can simplify the syntqx by adding properties in the component class:
+ ```
+   get firstName()
+  {
+    return this.contactForm.controls.firstName;
+
+  }
+ ```
+ Then the code in the template gets simplified:
+ ```
+ <em *ngIf="firstName.invalid && firstName.touched ">Please enter a First Name</em>
+ ```
+ Using the property invalid is not the most flexible approach when we need to show a message specific to a validator and we have more than one validator, because the all the validators that are failing will turn the invalid property to true and we might show misleading error messages. To overcome that we use the error property, like we show in the following example where we added a second rule (name needs to have a min lenght of 3):
+ 
+ ```
+<em *ngIf="firstName.errors?.['required'] && firstName.touched ">Please enter a First Name</em>
+        <em *ngIf="firstName.errors?.['minlength'] && firstName.touched ">First Name must be at least 3 characters.</em>
+ ```
