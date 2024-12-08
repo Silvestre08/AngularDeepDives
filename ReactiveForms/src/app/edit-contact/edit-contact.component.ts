@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ContactsService } from '../contacts/contacts.service';
 import { phoneTypeValues } from '../contacts/contact.model';
 import { addressTypeValues } from '../contacts/contact.model';
+import { restrictedWords } from '../validators/restricted-words-validator';
 
 @Component({
   templateUrl: './edit-contact.component.html',
@@ -21,16 +22,16 @@ export class EditContactComponent implements OnInit {
     lastName: '',
     dateOfBirth: <Date | null> null,
     favoritesRanking: <number | null> null,
-    notes: '',
+    notes: ['', restrictedWords(['foo', 'bar'])],
     phone: this.fb.nonNullable.group({
       phoneNumber: '',
       phoneType: '',
     }),
     address: this.fb.nonNullable.group({
-      streetAddress: '',
-      city: '',
-      state: '',
-      postalCode: '',
+      streetAddress: ['',Validators.required],
+      city: ['',Validators.required],
+      state: ['',Validators.required],
+      postalCode: ['',Validators.required],
       addressType: '',
     })
   });
@@ -51,6 +52,10 @@ export class EditContactComponent implements OnInit {
   {
     return this.contactForm.controls.firstName;
 
+  }
+  get notes() 
+  {
+    return this.contactForm.controls.notes;
   }
 
   saveContact() {
