@@ -427,3 +427,63 @@ Also because the validator is returning a list of invalid words we can see it in
       <em *ngIf="notes.errors?.['restrictedWords']">Restricted words found: {{notes.errors?.['restrictedWords']}}</em>
 
 ```
+
+## Custom controls and controlValueAccessors
+
+We have seen that Angular does not have a control value accessor to work with dates, so we work with dates by using strings. We can also create our default control value accessor though.
+An accessor is a directive, and we can configure the directive selector to be used with all input fields of type date.
+To remember that a ControlValueAccessor handles updating an HTML element value when its bound data model field changes. It is also responsible to update the data model when the HTML element's value changes.
+We need to implement the ControlValueAccessor interface. The functions to implement are the following:
+
+```
+@Directive({
+  selector: 'input([type=date])[ngModel],input([type=date])[formControl],input([type=date])[formControlName]', // the selector guarantees we can use on any elements of type date as long as long as they have one of three forms directives
+})
+
+export class DateValueAccessorDirective implements ControlValueAccessor {
+
+  constructor(private element: ElementRef) {
+
+   }
+
+  // called whenever the bound data model field value changes, updating the html element
+  writeValue(newValue: any): void {
+    if(newValue instanceof Date){
+
+    this.element.nativeElement.value = newValue.toISOString().split('T')[0]
+    }
+    //yyyy-mm-dd
+  }
+
+  // to handle the changes in the html elements we need to register to events. We fetch the event target property as date
+  // That will return the text of the input element as a date. When the input event fires it will call our onChange method and pass in the valueAsDate value.
+  @HostListener('input', ['$event.target.valueAsDate']) private onChange!: Function
+
+  // when angular sees a control value accessor directive, it calls the registerOnChange and provides the callback function we need to call to update our data model.
+  // Our function fetches the value as date from our input element and we pass the value as an actual date object to the callback angular provides us.
+  registerOnChange(fn: Function): void {
+   this.onChange = (valueAsDate: Date) => {fn(valueAsDate)};
+  }
+
+  @HostListener('blur', []) private onTouched!: Function
+  registerOnTouched(fn: Function): void {
+    this.onTouched = fn;
+  }
+  setDisabledState?(isDisabled: boolean): void {
+    throw new Error('Method not implemented.');
+  }
+}
+```
+
+In the component class file, the new control value accessor needs to be imported.
+
+## Custom input controls
+
+We created a new component first, called profile-icon-selector that shows all icons, if the user did not select an icon.
+The thing is that this icon is still not working with our data model by default.
+To wire up a custom component with data model, using formControlName, we need to implement the control value accessor interface.
+After that, we can use the formControlName directive directly on our custom component:
+
+```
+<con-profile-icon-selector formControlName ="icon" name="icon"></con-profile-icon-selector>
+```
