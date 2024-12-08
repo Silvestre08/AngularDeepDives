@@ -235,13 +235,15 @@ We initialize the contact form like this:
 The fb is of type FormBuilder.
 We can use this.contactForm.PatchValue to initialize just some of the fields and not the entire form
 
-
 ## Common input elements and data types
+
 ### Radio buttons
+
 Setting formControlName in a group of radio buttons makes it possible use reactive forms with them. It also makes that exclusive to each other, if a set of radio buttons has the same formControlName property, otherwise they will be independent.
 This is the same as setting the name attribute to the same value with a traditional HTML form.
 
 ### Select lists
+
 Simpler than radio buttons. We set the formControlName and then generate a lits of options.
 
 ```
@@ -254,51 +256,66 @@ Simpler than radio buttons. We set the formControlName and then generate a lits 
 
 Lets add a check box to check if a contact is a personal contact.
 After adding a property to our model and to the form control we can add it to the template:
+
 ```
         <div>
           <input type="checkbox" formControlName ="isPersonal"/>
         </div>
 ```
+
 We do not need to specify a value because reactive forms treat checkboxes as boolean
 When we apply the formControlName attribute to an input element of type checkbox, angular applies a special control value accessor into it: checkboxcontrovalueaccessor.
 even if we set the value of the input element to a string like 'foo' the this cva always ensures we have the type of boolean and not string (becasue the property is completely ignored).
 
 ### Numeric input elements
+
 Our favourites ranking field is actually working as type string behind the scenes. It is a plain old input text element, and when we apply the formControlName directive, it is assigned the default cva, that it updates the elements as string.
 Angular has a numericValueAccessor, that can be used.So we need to change te type to number:
+
 ```
         <input formControlName = "favoritesRanking" type="number" placeholder="Favorites Ranking" />
 ```
+
 This prevents the insertion of letters, etc
 
 ### Range inputs
+
 We can also use range as a type (it will render as a slider control).
 Angular has a range value accessor that supplies numeric values.
+
 ```
         <div>
           <span>Favourites Ranking:</span>
           <input formControlName = "favoritesRanking" type="range" min="0" max="5" placeholder="Favorites Ranking" />
           <span>{{contactForm.controls.favoritesRanking.value}}</span>
-        
+
         </div>
 ```
+
 ### Text area
+
 Similar to other text input type elements.
+
 ```
     <section>
       <nav>Notes</nav>
       <textarea placeholder="Notes" rows="5" formControlName="notes"></textarea>
     </section>
 ```
+
 ### Date fields
+
 The date field in the beginning looks a little ugly because it uses the default value accessor. We can try to improve it by using the date field like this:
+
 ```
-    <input formControlName = "dateOfBirth" type="date" [value]="contactForm.controls.dateOfBirth.value | date:'yyyy-MM-dd'" 
+    <input formControlName = "dateOfBirth" type="date" [value]="contactForm.controls.dateOfBirth.value | date:'yyyy-MM-dd'"
         placeholder="Date of Birth" />
 ```
+
 Even when we use it like this, Angular still treats this value as a string. Angular does not have an out of the box value accessor for dates.
 the options we have are either create a custom valie accessor or just work with dates as string, which is fine most of the time.
 We can leave that pipe like that on the template (the type date gives us the date picker out of the box). Now, on our service we can just change the type to string and format the value accordingly:
+
 ```
 // contact service
     .pipe(map(c=> {c.dateOfBirth = c.dateOfBirth.split('T')[0];
@@ -306,39 +323,107 @@ We can leave that pipe like that on the template (the type date gives us the dat
     }));
 ```
 
-## Validation in reactive forms 
-We add validation to reactive forms by adding validators to form controls. 
+## Validation in reactive forms
+
+We add validation to reactive forms by adding validators to form controls.
 Out of the box validators in Angular:
 ![](doc/Validators.PNG)
 In template driven forms, we would add the required attribute to an input control element directly on the template.
-In reactive forms, we create the form controls ourselves and we will add the validators in the component class directly. We can pass an array of validators to the form control constructor. 
+In reactive forms, we create the form controls ourselves and we will add the validators in the component class directly. We can pass an array of validators to the form control constructor.
 We are using form builder and we can do that in a similar way. See the required validator for the field first name:
+
 ```
   contactForm = this.fb.nonNullable.group({
     id: '',
     isPersonal: false,
     firstName: ['', Validators.required],}) // required field validator
- ```
- To show an error message when the first name is empty we can use the invalid property:
- ```
-        <em *ngIf="contactForm.controls.firstName.invalid && contactForm.controls.firstName.touched ">Please enter a First Name</em>
-        // show when emppty and when field is touched so when creating a new contact we do not have an error immediatly.
- ```
- We can simplify the syntqx by adding properties in the component class:
- ```
-   get firstName()
-  {
-    return this.contactForm.controls.firstName;
+```
 
-  }
- ```
- Then the code in the template gets simplified:
- ```
- <em *ngIf="firstName.invalid && firstName.touched ">Please enter a First Name</em>
- ```
- Using the property invalid is not the most flexible approach when we need to show a message specific to a validator and we have more than one validator, because the all the validators that are failing will turn the invalid property to true and we might show misleading error messages. To overcome that we use the error property, like we show in the following example where we added a second rule (name needs to have a min lenght of 3):
- 
- ```
+To show an error message when the first name is empty we can use the invalid property:
+
+```
+       <em *ngIf="contactForm.controls.firstName.invalid && contactForm.controls.firstName.touched ">Please enter a First Name</em>
+       // show when emppty and when field is touched so when creating a new contact we do not have an error immediatly.
+```
+
+We can simplify the syntqx by adding properties in the component class:
+
+```
+  get firstName()
+ {
+   return this.contactForm.controls.firstName;
+
+ }
+```
+
+Then the code in the template gets simplified:
+
+```
+<em *ngIf="firstName.invalid && firstName.touched ">Please enter a First Name</em>
+```
+
+Using the property invalid is not the most flexible approach when we need to show a message specific to a validator and we have more than one validator, because the all the validators that are failing will turn the invalid property to true and we might show misleading error messages. To overcome that we use the error property, like we show in the following example where we added a second rule (name needs to have a min lenght of 3):
+
+```
 <em *ngIf="firstName.errors?.['required'] && firstName.touched ">Please enter a First Name</em>
-        <em *ngIf="firstName.errors?.['minlength'] && firstName.touched ">First Name must be at least 3 characters.</em>
- ```
+       <em *ngIf="firstName.errors?.['minlength'] && firstName.touched ">First Name must be at least 3 characters.</em>
+```
+
+### Validate form groups
+
+Like individual fields, we can validate form groups and entire forms. Let's add validation to the form group address. First we start by adding individual validators to the fields we want to validate.If any of the elements of the form group are invalid or dirty, the form group will be invalid or dirty.
+See an example of how to validate the address form group:
+
+```
+        <div formGroupName="address" class="address" [class.error]="contactForm.controls.address.invalid && contactForm.controls.address.dirty">
+         <div class="flex-group">
+           <input placeholder="Address" formControlName ="streetAddress" />
+           <img src="/assets/plus-grey-blue.png" class="add" />
+         </div>
+         <input placeholder="City" formControlName ="city" />
+         <input placeholder="State/Region" formControlName ="state" />
+         <input placeholder="Zip/Postal Code" formControlName ="postalCode" />
+         <select formControlName="addressType">
+           <option *ngFor="let addressType of addressTypeValues" [value]="addressType.value">{{addressType.title}}</option>
+         </select>
+       </div>
+       <em *ngIf="contactForm.controls.address.invalid && contactForm.controls.address.dirty">Incomplete Address</em>
+     </div>
+```
+
+Because the whole form is also a form group, we can take advantage of this type of validation to check if the entire form is valid. We can use that to prevent the submission of the form with invalid data:
+
+```
+      <button class="primary" type="submit" [disabled]="contactForm.invalid" >Save</button>
+```
+
+### Creating custom validator
+
+Creating custom validator are implemented by exporting functions. If we need to pass data into our custom validator we need to wrapp that function in another functions. Lets see an example of restricting some words that cannot be enterred in the notes field. For that, lets create the restricted-words-validator:
+
+```
+import { AbstractControl, ValidationErrors } from "@angular/forms";
+
+export function restrictedWords(words: string[]){
+
+    return (control : AbstractControl) : ValidationErrors | null =>
+        {
+            const invalidWords = words.map(w => control.value.includes(w)? w : null).filter(w => w!== null)
+            return invalidWords.length > 0 ? {restrictedWords : invalidWords.join(',')} // I can set the return to any object
+            : null
+        }
+
+```
+
+Because the validator accepts a list of invalid words we can set the parameters to the function like this (component class):
+
+```
+    notes: ['', restrictedWords(['foo', 'bar'])],
+```
+
+Also because the validator is returning a list of invalid words we can see it in the UI:
+
+```
+      <em *ngIf="notes.errors?.['restrictedWords']">Restricted words found: {{notes.errors?.['restrictedWords']}}</em>
+
+```

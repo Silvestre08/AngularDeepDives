@@ -40,7 +40,7 @@
     <section>
       <nav>Address</nav>
       <div>
-        <div formGroupName="address" class="address">
+        <div formGroupName="address" class="address" [class.error]="contactForm.controls.address.invalid && contactForm.controls.address.dirty">
           <div class="flex-group">
             <input placeholder="Address" formControlName ="streetAddress" />
             <img src="/assets/plus-grey-blue.png" class="add" />
@@ -52,15 +52,17 @@
             <option *ngFor="let addressType of addressTypeValues" [value]="addressType.value">{{addressType.title}}</option>
           </select>
         </div>
+        <em *ngIf="contactForm.controls.address.invalid && contactForm.controls.address.dirty">Incomplete Address</em>
       </div>
     </section>
     <section>
       <nav>Notes</nav>
-      <textarea placeholder="Notes" rows="5" formControlName="notes"></textarea>
+      <textarea placeholder="Notes" rows="5" formControlName="notes" [class.error]="notes.invalid"></textarea>
+      <em *ngIf="notes.errors?.['restrictedWords']">Restricted words found: {{notes.errors?.['restrictedWords']}}</em>
     </section>
     <div class="buttons">
       <button class="secondary" (click)="cancel()">Cancel</button>
-      <button class="primary" (click)="saveContact()">Save</button>
+      <button class="primary" type="submit" [disabled]="contactForm.invalid" >Save</button>
     </div>
   </form>
 </div>
