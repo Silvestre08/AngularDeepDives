@@ -420,6 +420,8 @@ We need to implement the ControlValueAccessor interface. The functions to implem
   selector: 'input([type=date])[ngModel],input([type=date])[formControl],input([type=date])[formControlName]',
   standalone: true
 })
+/*the selector guarantees we can use on any elements of type date as long as long as they have one of three forms directives
+*/
 export class DateValueAccessorDirective implements ControlValueAccessor {
 
   constructor(private element: ElementRef) {

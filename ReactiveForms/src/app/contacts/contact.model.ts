@@ -1,5 +1,6 @@
 export interface Contact {
   id: string,
+  icon: string,
   isPersonal: boolean,
   firstName: string,
   lastName: string,
