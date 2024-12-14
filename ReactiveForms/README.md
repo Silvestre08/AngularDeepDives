@@ -487,3 +487,54 @@ After that, we can use the formControlName directive directly on our custom comp
 ```
 <con-profile-icon-selector formControlName ="icon" name="icon"></con-profile-icon-selector>
 ```
+
+## Dynamically addind form elements
+We are showing the example of adding multiple phone numbers, a recurrent use case. We can achieve such functionality by using form arrays.
+Form arrays are arrays of form controls or FormGroups. We can use form array class or the method array of the form builder:
+![](doc/formarray.PNG)
+We can push items to the array:
+![](doc/itemsformarray.PNG)
+
+This enables us to modfy the form model at runtime.
+We change our data model property phone. We renamed it to phones and changed it to an array of phones. Now in our form builder we can declare it like this:
+```
+    phones: this.fb.array([this.createPhoneGroup()]),
+```
+
+In order to bind the form array to our template, we need to use the formArrayName directive. We can then access the elements of the form array by index:
+```
+    <section>
+      <nav>Phones</nav>
+      <div formArrayName="phones" >
+        <div *ngFor="let phone of contactForm.controls.phones.controls, let i=index" [formGroupName] ="i" class="flex-column">
+        <div class="flex-group">
+          <input formControlName = "phoneNumber" placeholder="Phone" />
+          <img src="/assets/plus-grey-blue.png" class="add" (click)="addPhone()" />
+        </div>
+        <div class="radio">
+          <span *ngFor="let phoneType of phoneTypes ">
+            <input type="radio" formControlName ="phoneType" [value]="phoneType.value"> {{phoneType.title}}
+          </span>
+        </div>
+      </div>
+    </div>
+    </section>
+```
+
+We need to keep in mind that, when initializing the form control we need to initialize the form array element to the same number of contacts that come from our API:
+```
+  ngOnInit() {
+    const contactId = this.route.snapshot.params['id'];
+    if (!contactId) return
+
+    this.contactsService.getContact(contactId).subscribe(
+      (contact) => {
+        if(!contact) return;
+        for(let i =1; i< contact.phones.length; i++){
+          this.contactForm.controls.phones.push(this.createPhoneGroup());
+        }
+        this.contactForm.setValue(contact);
+      }
+    )
+  }
+```
