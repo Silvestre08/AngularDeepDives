@@ -9,11 +9,13 @@ export interface Contact {
   phones: Phone[],
   address: Address,
   notes: string,
+
 }
 
 export interface Phone {
   phoneNumber: string,
   phoneType: string,
+  preferred: boolean,
 }
 
 export interface Address {
