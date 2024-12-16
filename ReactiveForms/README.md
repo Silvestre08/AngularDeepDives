@@ -538,3 +538,62 @@ We need to keep in mind that, when initializing the form control we need to init
     )
   }
 ```
+## Reacting to changes
+Sometime we want to react to changes and provide better user experience: populate a field when other field changes, for example.
+We can subscribe to events to listen to changes. We added a new checkbox to our contact template. When the checkbox is checked, so the contact is a preferred contact, the checked contact needs to be mandatory. The following snippet shows how we can do this:
+
+```
+  phoneGroup.controls.preferred.valueChanges
+  // this pipe prevents and infinite loop. When calling updateValueAndValidity we may cause a reaction where values and vbalidity will trigger another revalidation, etc-.
+  .pipe(distinctUntilChanged((a,b)=> JSON.stringify(a) === JSON.stringify(b)))
+  .subscribe(value => {
+    if(value){
+      phoneGroup.controls.phoneNumber.addValidators([Validators.required]);
+      }
+      else{
+        phoneGroup.controls.phoneNumber.removeValidators([Validators.required]);
+      }
+      // so that angular is aware that validation rules have changed 
+      //if we are still showing error messages when the validators have been removed (they need to disappear)
+      phoneGroup.controls.phoneNumber.updateValueAndValidity();
+  })
+  return phoneGroup
+
+  ```
+
+  The value changes observable is available for all abstract controls so that includes form groups. In the above code we are reacting to the preferred control but we could react to any control of the form group like this:
+  phoneGroup.valueChanges. In this case we would have to work with the form group that has the form controls inside of it.
+  We can react to statuschanges to react to changes in validity.
+
+  ### Reactive transformations
+  This is more a RxJS topic than an Angular topic. Lets use the RxJS debounceTime transformation to improve our user experience:
+  Only when the user stops typping, we will show that the Address is incomplete, instead of showing the message right away.
+  This transformation hold on repeated events by a certain amount of time.
+```
+    subscribeToAddressChanges(){
+    const addressGroup = this.contactForm.controls.address;
+    addressGroup.valueChanges
+    .pipe(distinctUntilChanged((a,b)=> this.stringifyCompare(a, b)))
+    .subscribe(() => {
+      for(const controlName in addressGroup.controls){
+        addressGroup.get(controlName)?.removeValidators([Validators.required]);
+        addressGroup.get(controlName)?.updateValueAndValidity()
+      }
+    })
+
+    addressGroup.valueChanges
+    .pipe(debounceTime(2000),distinctUntilChanged((a,b)=> this.stringifyCompare(a, b)))
+    .subscribe(() => {
+      for(const controlName in addressGroup.controls){
+        addressGroup.get(controlName)?.addValidators([Validators.required]);
+        addressGroup.get(controlName)?.updateValueAndValidity()
+      }
+    })
+  }
+
+    ```
+
+    The above code subscribes to the address form group value canges twice. Basically, we remove the validators in the entire group when the user starts typing on an address field.
+    We dont't see any error messages while the user is still filling the address.
+    The second subscription adds the validators back but only when the user stops typing for more than 2 seconds, using the debounce time RxJS.
+    It listens for all the value changes events but only adds the validators back when 2 seconds have passed since the last value changes

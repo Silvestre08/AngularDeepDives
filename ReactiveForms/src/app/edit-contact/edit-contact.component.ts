@@ -5,6 +5,7 @@ import { ContactsService } from '../contacts/contacts.service';
 import { phoneTypeValues } from '../contacts/contact.model';
 import { addressTypeValues } from '../contacts/contact.model';
 import { restrictedWords } from '../validators/restricted-words-validator';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   templateUrl: './edit-contact.component.html',
@@ -36,24 +37,49 @@ export class EditContactComponent implements OnInit {
 
   ngOnInit() {
     const contactId = this.route.snapshot.params['id'];
-    if (!contactId) return
+    if (!contactId) {
+      this.subscribeToAddressChanges();
+      return;
+    }
 
     this.contactsService.getContact(contactId).subscribe(
       (contact) => {
         if(!contact) return;
         for(let i =1; i< contact.phones.length; i++){
-          this.contactForm.controls.phones.push(this.createPhoneGroup());
+          this.addPhone();
         }
         this.contactForm.setValue(contact);
+        this.subscribeToAddressChanges();
       }
     )
   }
 
 createPhoneGroup(){
-  return this.fb.nonNullable.group({
+  const phoneGroup = this.fb.nonNullable.group({
     phoneNumber: '',
     phoneType: '',
+    preferred: false
   })
+
+  phoneGroup.controls.preferred.valueChanges
+  // this pipe prevents and infinite loop. When calling updateValueAndValidity we may cause a reaction where values and vbalidity will trigger another revalidation, etc-.
+  .pipe(distinctUntilChanged((a,b)=> this.stringifyCompare(a, b)))
+  .subscribe(value => {
+    if(value){
+      phoneGroup.controls.phoneNumber.addValidators([Validators.required]);
+      }
+      else{
+        phoneGroup.controls.phoneNumber.removeValidators([Validators.required]);
+      }
+      // so that angular is aware that validation rules have changed 
+      //if we are still showing error messages when the validators have been removed (they need to disappear)
+      phoneGroup.controls.phoneNumber.updateValueAndValidity();
+  })
+  return phoneGroup
+}
+
+stringifyCompare(a: any, b: any){
+  return JSON.stringify(a) === JSON.stringify(b)
 }
 
 addPhone(){
@@ -68,6 +94,27 @@ addPhone(){
   get notes() 
   {
     return this.contactForm.controls.notes;
+  }
+
+  subscribeToAddressChanges(){
+    const addressGroup = this.contactForm.controls.address;
+    addressGroup.valueChanges
+    .pipe(distinctUntilChanged((a,b)=> this.stringifyCompare(a, b)))
+    .subscribe(() => {
+      for(const controlName in addressGroup.controls){
+        addressGroup.get(controlName)?.removeValidators([Validators.required]);
+        addressGroup.get(controlName)?.updateValueAndValidity()
+      }
+    })
+
+    addressGroup.valueChanges
+    .pipe(debounceTime(2000),distinctUntilChanged((a,b)=> this.stringifyCompare(a, b)))
+    .subscribe(() => {
+      for(const controlName in addressGroup.controls){
+        addressGroup.get(controlName)?.addValidators([Validators.required]);
+        addressGroup.get(controlName)?.updateValueAndValidity()
+      }
+    })
   }
 
   saveContact() {
